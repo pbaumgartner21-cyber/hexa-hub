@@ -1,0 +1,18 @@
+{
+  "name": "hexa-hub-discord-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord officiel HEXA_HUB.",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "node deploy-commands.js",
+    "start": "node index.js",
+    "check": "node --check index.js && node --check deploy-commands.js && node --check config.js && node --check api/server.js && node --check commands/reglement.js && node --check commands/mises-a-jour.js && node --check commands/comptes.js && node --check commands/status.js && node --check commands/catalogue.js && node --check commands/catalogue-admin.js && node --check commands/vouch.js && node --check commands/support.js && node --check commands/argent.js && node --check commands/moderation.js && node --check commands/clear.js && node --check events/ready.js && node --check events/interactionCreate.js && node --check events/guildMemberAdd.js && node --check events/guildMemberRemove.js && node --check events/guildMemberUpdate.js && node --check events/guildBanAdd.js && node --check events/guildBanRemove.js && node --check events/messageDelete.js && node --check events/messageUpdate.js && node --check events/messageBulkDelete.js && node --check events/voiceStateUpdate.js && node --check events/channelCreate.js && node --check events/channelUpdate.js && node --check events/channelDelete.js && node --check events/roleCreate.js && node --check events/roleDelete.js && node --check templates/embeds.js && node --check utils/banner.js && node --check utils/channels.js && node --check utils/messages.js && node --check utils/modLogs.js && node --check utils/discordDataStore.js && node --check utils/accountPrivate.js && node --check services/accounts.js && node --check services/catalogue.js && node --check services/orders.js && node --check services/vouches.js && node --check buttons/accounts.js && node --check buttons/catalogue.js && node --check buttons/vouches.js && node --check buttons/support.js && node --check buttons/moderation.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.19.3",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

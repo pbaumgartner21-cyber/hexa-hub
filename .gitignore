@@ -1,0 +1,10 @@
+node_modules/
+.env
+data/accounts.json
+data/catalogue.json
+data/vouches.json
+data/orders.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
