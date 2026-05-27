@@ -9,6 +9,8 @@ Bot Discord structure pour HEXA_HUB avec:
 - `/status` qui poste l'etat ouvert/ferme dans le salon `1506702782839918722`
 - `/catalogue` qui poste le catalogue public dans le salon `1504979977798553782`
 - `/catalogue-admin` qui poste la gestion admin dans le salon `1508127052040241282`
+- `/seller-catalogue` qui poste le catalogue public des sellers
+- `/devenir-seller` qui poste le panel pour demander a devenir seller
 - `/vouch` qui poste le panel avis dans le salon `1507072193006403594`
 - `/support` qui poste le panel support dans le salon ou la commande est lancee
 - `/argent` qui ajoute de l'argent au solde d'un membre
@@ -59,6 +61,8 @@ Discord n'accepte pas les emojis dans les noms de slash commands. Les commandes 
 /status
 /catalogue
 /catalogue-admin
+/seller-catalogue
+/devenir-seller
 /vouch
 /support
 /argent
@@ -184,6 +188,37 @@ Utilise `/catalogue-admin` dans Discord pour poster le panneau de gestion admin.
 - publier le catalogue public
 
 Quand tu cliques sur `Publier`, le bot modifie le catalogue public et annonce automatiquement les nouveaux produits ou le stock ajoute dans le salon restock.
+
+## Sellers
+
+Utilise `/devenir-seller` dans le salon `❓︱devenir-seller` pour poster le panel de candidature seller.
+
+Le panel explique:
+
+- seller simple: `10€` par produit valide
+- seller premium: `30€` pour une categorie complete avec autant de produits que voulu
+
+Le staff recoit les demandes dans `SELLER_REQUESTS_CHANNEL_ID` puis peut valider en seller simple, valider en premium ou refuser.
+
+Roles:
+
+```env
+SELLER_ROLE_ID=1509143994242830346
+SELLER_PREMIUM_ROLE_ID=1509144442018201730
+```
+
+Quand un membre a le role seller, son salon prive de compte affiche un bouton `Panel seller`. Depuis ce panel il peut:
+
+- ajouter un produit
+- voir son catalogue
+- modifier ses produits
+- modifier le stock
+- soumettre au staff
+- actualiser
+
+Un seller premium peut aussi modifier sa categorie premium. Il ne peut avoir qu'une seule categorie premium.
+
+Utilise `/seller-catalogue` dans le salon `🛍️︱seller-catalogue` pour poster le catalogue public des produits seller valides.
 
 ## Vouch
 

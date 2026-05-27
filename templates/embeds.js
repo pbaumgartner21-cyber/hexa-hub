@@ -255,7 +255,7 @@ function buildAccountCreatedAdminMessage(user, member, account, totalAccounts) {
   return attachBanner(embed);
 }
 
-function buildAccountPrivateMessage(user, account, orders = []) {
+function buildAccountPrivateMessage(user, account, orders = [], options = {}) {
   const balance = Number(account.balance || 0).toFixed(2);
   const blocked = Boolean(account.shopBlocked);
   const connectionDate = account.lastLoginAt || account.createdAt;
@@ -330,7 +330,19 @@ function buildAccountPrivateMessage(user, account, orders = []) {
       .setStyle(ButtonStyle.Primary)
   );
 
-  return withoutBanner(embed, [row]);
+  const rows = [row];
+
+  if (options.isSeller) {
+    rows.push(new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('seller:panel')
+        .setLabel(options.isSellerPremium ? 'Panel seller premium' : 'Panel seller')
+        .setEmoji('🛍️')
+        .setStyle(options.isSellerPremium ? ButtonStyle.Success : ButtonStyle.Secondary)
+    ));
+  }
+
+  return withoutBanner(embed, rows);
 }
 
 function buildOrderClaimTicketMessage(user, order, product, category) {
@@ -983,6 +995,273 @@ function buildRestockMessage(products) {
   return withoutBanner(embed);
 }
 
+function buildBecomeSellerMessage() {
+  const embed = createBaseEmbed('HEXA_HUB SELLER', 'HEXA_HUB • SELLER SYSTEM')
+    .setTitle('❓ DEVENIR SELLER HEXA_HUB')
+    .setDescription([
+      '💜 TU VEUX VENDRE TES PROPRES PRODUITS ?',
+      '',
+      'HEXA_HUB PEUT AFFICHER TES PRODUITS',
+      'DANS UN CATALOGUE SELLER SÉPARÉ.',
+      '',
+      '━━━━━━━━━━━━━━━━━━',
+      '',
+      '🛍️ SELLER SIMPLE',
+      '10€ PAR PRODUIT VALIDÉ',
+      'TES PRODUITS SONT AFFICHÉS',
+      'DANS LE CATALOGUE SELLER.',
+      '',
+      '💎 SELLER PREMIUM',
+      '30€ POUR TA PROPRE CATÉGORIE',
+      'TU PEUX Y METTRE AUTANT',
+      'DE PRODUITS QUE TU VEUX.',
+      '',
+      '━━━━━━━━━━━━━━━━━━',
+      '',
+      '📋 POUR POSTULER',
+      'CLIQUE SUR LE BOUTON',
+      'ET DONNE LES INFORMATIONS DEMANDÉES.',
+      '',
+      '⚠️ LE STAFF VALIDE OU REFUSE',
+      'CHAQUE DEMANDE ET CHAQUE PRODUIT.'
+    ].join('\n'));
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('seller:apply')
+      .setLabel('Faire une demande')
+      .setEmoji('🛍️')
+      .setStyle(ButtonStyle.Success)
+  );
+
+  return withBannerAndComponents(embed, [row]);
+}
+
+function buildSellerApplicationReviewMessage(application) {
+  const embed = createBaseEmbed('HEXA_HUB SELLER ADMIN', 'HEXA_HUB • SELLER VERIFY')
+    .setTitle('🛍️ DEMANDE SELLER À VÉRIFIER')
+    .setDescription([
+      `👤 Membre: <@${application.user.id}>`,
+      `🧾 ID: **${application.id}**`,
+      `💼 Formule demandée: **${application.plan === 'premium' ? 'Premium' : 'Simple'}**`,
+      '',
+      `🏷️ Nom boutique: **${trimText(application.shopName, 120)}**`,
+      '',
+      '📦 Produits prévus',
+      trimText(application.products, 900),
+      '',
+      '🧠 Expérience / détails',
+      trimText(application.experience, 700),
+      '',
+      '📩 Contact',
+      trimText(application.contact, 300)
+    ].join('\n'));
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`seller-app:approve-standard:${application.id}`)
+      .setLabel('Valider seller')
+      .setEmoji('✅')
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setCustomId(`seller-app:approve-premium:${application.id}`)
+      .setLabel('Valider premium')
+      .setEmoji('💎')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(`seller-app:reject:${application.id}`)
+      .setLabel('Refuser')
+      .setEmoji('❌')
+      .setStyle(ButtonStyle.Danger)
+  );
+
+  return withBannerAndComponents(embed, [row]);
+}
+
+function buildSellerCataloguePublicMessage(store) {
+  const categories = store.categories || [];
+  const productCount = categories.reduce((total, category) => total + (category.products?.length || 0), 0);
+  const embed = createBaseEmbed('HEXA_HUB SELLERS', 'HEXA_HUB • SELLER CATALOGUE')
+    .setTitle('🛍️ SELLER CATALOGUE')
+    .setDescription([
+      '💜 PRODUITS DES SELLERS VALIDÉS',
+      '',
+      'CHOISIS UNE CATÉGORIE',
+      'DANS LE MENU CI-DESSOUS.',
+      '',
+      '⚡ STOCK LIVE',
+      '🔒 SELLERS VÉRIFIÉS',
+      '💜 CATALOGUE HEXA_HUB',
+      '',
+      `📦 ${categories.length} CATÉGORIE(S)`,
+      `🛍️ ${productCount} PRODUIT(S)`
+    ].join('\n'));
+
+  const options = categories.slice(0, 25).map((category) => ({
+    label: trimText(`${category.emoji || '🛍️'} ${category.name}`, 100),
+    value: category.id,
+    description: trimText(category.description || 'Voir les produits.', 100),
+    emoji: '🛍️'
+  }));
+  const selectRow = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId('seller-catalogue:category')
+      .setPlaceholder(options.length > 0 ? 'Choisis une catégorie seller' : 'Aucun produit seller')
+      .setDisabled(options.length === 0)
+      .addOptions(options.length > 0 ? options : [{ label: 'Aucun produit', value: 'empty', description: 'Aucun produit seller validé.' }])
+  );
+  const buttonRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('seller-catalogue:refresh')
+      .setLabel('Actualiser')
+      .setEmoji('🔄')
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  return withBannerAndComponents(embed, [selectRow, buttonRow]);
+}
+
+function buildSellerCatalogueCategoryMessage(category) {
+  const categoryEmbed = createBaseEmbed('HEXA_HUB SELLERS', 'HEXA_HUB • SELLER CATEGORY')
+    .setTitle(`${category.emoji || '🛍️'} ${category.name}`)
+    .setDescription([
+      '━━━━━━━━━━━━━━━━━━',
+      category.description || 'Produits disponibles dans cette catégorie.',
+      '',
+      `📦 ${category.products.length} PRODUIT(S)`
+    ].join('\n'));
+  const productEmbeds = category.products.slice(0, 9).map((product) => {
+    const stock = Number(product.stock || 0);
+    const embed = createBaseEmbed('HEXA_HUB SELLER PRODUCT', 'HEXA_HUB • SELLER PRODUCT')
+      .setTitle(`🛍️ ${trimText(product.name, 120)}`)
+      .setDescription([
+        `👤 Seller: **${trimText(product.sellerName || product.ownerName, 80)}**`,
+        `💳 Prix: **${trimText(product.price, 40)}**`,
+        `📦 Stock: **${stock}** ${stock <= 0 ? '• RUPTURE' : '• DISPONIBLE'}`,
+        '',
+        trimText(product.description, 700)
+      ].join('\n'));
+
+    if (product.imageUrl) embed.setImage(product.imageUrl);
+    return embed;
+  });
+
+  return { embeds: [categoryEmbed, ...productEmbeds] };
+}
+
+function buildSellerPanelMessage(seller, isPremium = false) {
+  const products = seller.products || [];
+  const approved = products.filter((product) => product.status === 'approved').length;
+  const pending = products.filter((product) => product.status === 'pending').length;
+  const drafts = products.filter((product) => ['draft', 'rejected'].includes(product.status)).length;
+  const embed = createBaseEmbed('HEXA_HUB SELLER', 'HEXA_HUB • SELLER PANEL')
+    .setTitle(isPremium ? '💎 PANEL SELLER PREMIUM' : '🛍️ PANEL SELLER')
+    .setDescription([
+      `👤 Seller: **${seller.displayName || seller.username}**`,
+      `💼 Statut: **${isPremium ? 'Premium' : 'Simple'}**`,
+      '',
+      `✅ Validés: **${approved}**`,
+      `⏳ En vérification: **${pending}**`,
+      `📝 Brouillons / à soumettre: **${drafts}**`,
+      '',
+      'AJOUTE TES PRODUITS, MODIFIE TON STOCK,',
+      'PUIS SOUMETS AU STAFF POUR VALIDATION.'
+    ].join('\n'));
+  const rowOne = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('seller:add-product').setLabel('Ajouter produit').setEmoji('➕').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('seller:view').setLabel('Voir catalogue').setEmoji('👁️').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('seller:edit-product').setLabel('Modifier produit').setEmoji('✏️').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('seller:stock-product').setLabel('Modifier stock').setEmoji('📦').setStyle(ButtonStyle.Secondary)
+  );
+  const rowTwo = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('seller:submit').setLabel('Soumettre au staff').setEmoji('📨').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('seller:refresh').setLabel('Actualiser').setEmoji('🔄').setStyle(ButtonStyle.Secondary)
+  );
+
+  if (isPremium) {
+    rowTwo.addComponents(
+      new ButtonBuilder().setCustomId('seller:edit-category').setLabel('Modifier catégorie').setEmoji('💎').setStyle(ButtonStyle.Success)
+    );
+  }
+
+  return withBannerAndComponents(embed, [rowOne, rowTwo]);
+}
+
+function buildSellerOwnCatalogueMessage(seller) {
+  const products = seller.products || [];
+  const embed = createBaseEmbed('HEXA_HUB SELLER', 'HEXA_HUB • MES PRODUITS')
+    .setTitle('🛍️ MES PRODUITS SELLER')
+    .setDescription(products.length > 0
+      ? products.slice(0, 10).map((product) => [
+          `**${trimText(product.name, 70)}**`,
+          `Statut: **${product.status}** • Stock: **${product.stock || 0}** • Prix: **${product.price}**`
+        ].join('\n')).join('\n\n')
+      : 'Aucun produit pour le moment.');
+
+  return withoutBanner(embed);
+}
+
+function buildSellerProductSelectMessage(seller, action) {
+  const labels = {
+    edit: {
+      title: '✏️ MODIFIER UN PRODUIT',
+      customId: 'seller:select-product:edit',
+      placeholder: 'Choisis le produit à modifier'
+    },
+    stock: {
+      title: '📦 MODIFIER LE STOCK',
+      customId: 'seller:select-product:stock',
+      placeholder: 'Choisis le produit'
+    }
+  };
+  const label = labels[action] || labels.edit;
+  const options = (seller.products || []).slice(0, 25).map((product) => ({
+    label: trimText(product.name, 100),
+    value: product.id,
+    description: trimText(`Stock: ${product.stock || 0} • ${product.status}`, 100),
+    emoji: '🛍️'
+  }));
+  const embed = createBaseEmbed('HEXA_HUB SELLER', 'HEXA_HUB • SELLER SELECT')
+    .setTitle(label.title)
+    .setDescription('Sélectionne un de tes produits.');
+  const row = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId(label.customId)
+      .setPlaceholder(label.placeholder)
+      .setDisabled(options.length === 0)
+      .addOptions(options.length > 0 ? options : [{ label: 'Aucun produit', value: 'empty', description: 'Ajoute un produit avant.' }])
+  );
+
+  return withoutBanner(embed, [row]);
+}
+
+function buildSellerSubmissionReviewMessage(seller, products) {
+  const embed = createBaseEmbed('HEXA_HUB SELLER ADMIN', 'HEXA_HUB • SELLER PRODUCTS')
+    .setTitle('📨 PRODUITS SELLER À VALIDER')
+    .setDescription([
+      `👤 Seller: <@${seller.userId}>`,
+      `💼 Statut: **${seller.tier === 'premium' ? 'Premium' : 'Simple'}**`,
+      '',
+      products.length > 0
+        ? products.slice(0, 8).map((product) => [
+            `**${trimText(product.name, 70)}**`,
+            `Prix: **${product.price}** • Stock: **${product.stock || 0}**`,
+            trimText(product.description, 180)
+          ].join('\n')).join('\n\n')
+        : 'Aucun produit soumis.'
+    ].join('\n'));
+
+  const productWithImage = products.find((product) => product.imageUrl);
+  if (productWithImage?.imageUrl) embed.setImage(productWithImage.imageUrl);
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`seller-product:approve:${seller.userId}`).setLabel('Valider produits').setEmoji('✅').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId(`seller-product:reject:${seller.userId}`).setLabel('Refuser produits').setEmoji('❌').setStyle(ButtonStyle.Danger)
+  );
+
+  return withBannerAndComponents(embed, [row]);
+}
+
 function stars(rating) {
   return '⭐'.repeat(rating);
 }
@@ -1287,6 +1566,7 @@ module.exports = {
   buildCatalogueCategoryMessage,
   buildCataloguePublicMessage,
   buildCartMessage,
+  buildBecomeSellerMessage,
   buildDeliveryMessage,
   buildAddedToCartMessage,
   buildProductOrderMessage,
@@ -1296,6 +1576,13 @@ module.exports = {
   buildRevenueStatsMessage,
   buildRulesMessage,
   buildShopStatusMessage,
+  buildSellerApplicationReviewMessage,
+  buildSellerCatalogueCategoryMessage,
+  buildSellerCataloguePublicMessage,
+  buildSellerOwnCatalogueMessage,
+  buildSellerPanelMessage,
+  buildSellerProductSelectMessage,
+  buildSellerSubmissionReviewMessage,
   buildSupportPanelMessage,
   buildSupportTicketMessage,
   buildModerationPanelMessage,

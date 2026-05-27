@@ -17,6 +17,8 @@ module.exports = {
   embedColor: parseColor(process.env.EMBED_COLOR),
   bannerPath: process.env.BANNER_PATH || 'templates/banner.png',
   staffRoleId: process.env.STAFF_ROLE_ID || '1504979937268863006',
+  sellerRoleId: process.env.SELLER_ROLE_ID || '1509143994242830346',
+  sellerPremiumRoleId: process.env.SELLER_PREMIUM_ROLE_ID || '1509144442018201730',
   api: {
     enabled: process.env.API_ENABLED !== 'false',
     port: Number(process.env.PORT || process.env.API_PORT || 3000),
@@ -34,6 +36,7 @@ module.exports = {
   dataChannels: {
     accounts: process.env.DATA_ACCOUNTS_CHANNEL_ID || '1508465065387626627',
     catalogue: process.env.DATA_CATALOGUE_CHANNEL_ID || '1508465069716013106',
+    sellers: process.env.DATA_SELLERS_CHANNEL_ID || process.env.DATA_CATALOGUE_CHANNEL_ID || '1508465069716013106',
     vouches: process.env.DATA_VOUCHES_CHANNEL_ID || '1508465156785438780',
     orders: process.env.DATA_ORDERS_CHANNEL_ID || '1508465204680458471'
   },
@@ -46,6 +49,9 @@ module.exports = {
     shopStatus: process.env.SHOP_STATUS_CHANNEL_ID || '1506702782839918722',
     catalogue: process.env.CATALOGUE_CHANNEL_ID || '1504979977798553782',
     catalogueAdmin: process.env.CATALOGUE_ADMIN_CHANNEL_ID || '1508127052040241282',
+    sellerCatalogue: process.env.SELLER_CATALOGUE_CHANNEL_ID || '',
+    devenirSeller: process.env.DEVENIR_SELLER_CHANNEL_ID || '',
+    sellerRequests: process.env.SELLER_REQUESTS_CHANNEL_ID || process.env.CATALOGUE_ADMIN_CHANNEL_ID || '1508127052040241282',
     commandeLogs: process.env.COMMANDE_CHANNEL_ID || '1508486820164538558',
     resultat: process.env.RESULTAT_CHANNEL_ID || '1508486879324934165',
     restock: process.env.RESTOCK_CHANNEL_ID || '1507378627338305558',

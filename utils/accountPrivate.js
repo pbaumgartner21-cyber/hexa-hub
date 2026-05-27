@@ -115,7 +115,13 @@ async function ensureAccountPrivateChannel(client, guild, user, account) {
   }
 
   const orders = await getOrdersForUser(account.userId, 5);
-  const payload = buildAccountPrivateMessage(user, account, orders);
+  const member = await targetGuild.members.fetch(user.id).catch(() => null);
+  const isSeller = Boolean(
+    member?.roles?.cache?.has(config.sellerRoleId) ||
+    member?.roles?.cache?.has(config.sellerPremiumRoleId)
+  );
+  const isSellerPremium = Boolean(member?.roles?.cache?.has(config.sellerPremiumRoleId));
+  const payload = buildAccountPrivateMessage(user, account, orders, { isSeller, isSellerPremium });
   let message = account.privateMessageId
     ? await channel.messages.fetch(account.privateMessageId).catch(() => null)
     : null;

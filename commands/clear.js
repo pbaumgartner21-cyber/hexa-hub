@@ -7,6 +7,7 @@ const CONFIRMATION_TEXT = 'RESET';
 const EMPTY_STORES = {
   accounts: { users: {} },
   catalogue: { publicMessage: null, categories: [] },
+  sellers: { publicMessage: null, applications: {}, sellers: {} },
   vouches: { panelMessage: null, vouches: {} },
   orders: { orders: {}, statsMessage: null }
 };

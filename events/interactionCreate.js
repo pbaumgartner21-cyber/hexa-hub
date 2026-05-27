@@ -17,6 +17,11 @@ const {
   handleSupportSelectMenu
 } = require('../buttons/support');
 const {
+  handleSellerButton,
+  handleSellerModalSubmit,
+  handleSellerSelectMenu
+} = require('../buttons/sellers');
+const {
   handleVouchButton,
   handleVouchSelectMenu,
   handleVouchModalSubmit
@@ -61,6 +66,7 @@ module.exports = {
         const handled =
           await handleAccountButton(interaction, client) ||
           await handleCatalogueButton(interaction, client) ||
+          await handleSellerButton(interaction, client) ||
           await handleModerationButton(interaction, client) ||
           await handleSupportButton(interaction, client) ||
           await handleVouchButton(interaction, client);
@@ -97,6 +103,7 @@ module.exports = {
       try {
         const handled =
           await handleCatalogueSelectMenu(interaction, client) ||
+          await handleSellerSelectMenu(interaction, client) ||
           await handleSupportSelectMenu(interaction, client) ||
           await handleVouchSelectMenu(interaction, client);
 
@@ -133,6 +140,7 @@ module.exports = {
         const handled =
           await handleAccountModalSubmit(interaction, client) ||
           await handleCatalogueModalSubmit(interaction, client) ||
+          await handleSellerModalSubmit(interaction, client) ||
           await handleModerationModalSubmit(interaction, client) ||
           await handleVouchModalSubmit(interaction, client);
 
